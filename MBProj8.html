@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+	<title>Rotating Pyramid</title>
+	<script type="text/javascript" src="../Common/initShaders.js"></script>
+	<script type="text/javascript" src="../Common/MVnew.js"></script>
+	<script type="text/javascript" src="MBProj8.js"></script>
+	<img src="racing-texture-atlas.png" id="texture-atlas" hidden></img>
+	<script type="x-shader/x-vertex" id="vertex-shader">
+		#version 300 es
+		uniform vec3 uRotationDegrees;
+		in vec4 aPosition;
+		in vec4 aBaseColor;
+		in vec2 aTextureCoordinates;
+		out vec4 vBaseColor;
+		out vec2 vTextureCoordinates;
+		void main() {
+			// calculate vertex texture coordinates
+			vTextureCoordinates = aTextureCoordinates;
+			// calculate vertex color
+			vBaseColor = aBaseColor;
+			// calculate vertex rotation matrices
+			vec3 rotationRadians = radians(uRotationDegrees);
+			vec3 c = cos(rotationRadians);
+			vec3 s = sin(rotationRadians);
+			mat4 rx = mat4(
+				1.0, 0.0,  0.0, 0.0,
+				0.0, c.x,  s.x, 0.0,
+				0.0, -s.x, c.x, 0.0,
+				0.0, 0.0,  0.0, 1.0
+			);
+			mat4 ry = mat4(
+				c.y, 0.0, -s.y, 0.0,
+				0.0, 1.0, 0.0,  0.0,
+				s.y, 0.0, c.y,  0.0,
+				0.0, 0.0, 0.0,  1.0
+			);
+			mat4 rz = mat4(
+				c.z,  s.z, 0.0, 0.0,
+				-s.z, c.z, 0.0, 0.0,
+				0.0,  0.0, 1.0, 0.0,
+				0.0,  0.0, 0.0, 1.0
+			);
+			// calculate vertex position
+			gl_Position = rz * ry * rx * aPosition;
+		}
+	</script>
+	<script type="x-shader/x-fragment" id="fragment-shader">
+		#version 300 es
+		precision mediump float;
+		uniform sampler2D uTextureAtlas;
+		in vec4 vBaseColor;
+		in vec2 vTextureCoordinates;
+		out vec4 fColor;
+		void main() {
+			// calculate fragment color
+			fColor = texture(uTextureAtlas, vTextureCoordinates) * vBaseColor;
+		}
+	</script>
+</head>
+<body>
+	<canvas id="display" width="512" height="512">
+		<p>Sorry! Your web browser doesn't support the HTML5 Canvas element. Try a different browser.</p>
+	</canvas>
+	<div id="controls">
+		<button id="button-rotate-x">Rotate X</button>
+		<button id="button-rotate-y">Rotate Y</button>
+		<button id="button-rotate-z">Rotate Z</button>
+		<button id="button-pause">Pause/Play</button>
+	</div>
+</body>
+<style type="text/css">
+	canvas {
+		background: blue;
+	}
+</style>
+</html>
