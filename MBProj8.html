@@ -8,53 +8,15 @@
 	<script type="text/javascript" src="MBProj8.js"></script>
 	<script type="x-shader/x-vertex" id="vertex-shader">
 		#version 300 es
-		uniform vec3 uRotationDegrees;
-		in vec4 aPosition;
-		in vec4 aBaseColor;
-		in vec2 aTextureCoordinates;
-		out vec4 vBaseColor;
-		out vec2 vTextureCoordinates;
 		void main() {
-			// calculate vertex texture coordinates
-			vTextureCoordinates = aTextureCoordinates;
-			// calculate vertex color
-			vBaseColor = aBaseColor;
-			// calculate vertex rotation matrices
-			vec3 rotationRadians = radians(uRotationDegrees);
-			vec3 c = cos(rotationRadians);
-			vec3 s = sin(rotationRadians);
-			mat4 rx = mat4(
-				1.0, 0.0,  0.0, 0.0,
-				0.0, c.x,  s.x, 0.0,
-				0.0, -s.x, c.x, 0.0,
-				0.0, 0.0,  0.0, 1.0
-			);
-			mat4 ry = mat4(
-				c.y, 0.0, -s.y, 0.0,
-				0.0, 1.0, 0.0,  0.0,
-				s.y, 0.0, c.y,  0.0,
-				0.0, 0.0, 0.0,  1.0
-			);
-			mat4 rz = mat4(
-				c.z,  s.z, 0.0, 0.0,
-				-s.z, c.z, 0.0, 0.0,
-				0.0,  0.0, 1.0, 0.0,
-				0.0,  0.0, 0.0, 1.0
-			);
-			// calculate vertex position
-			gl_Position = rz * ry * rx * aPosition;
+			// TODO: vertex shader
 		}
 	</script>
 	<script type="x-shader/x-fragment" id="fragment-shader">
 		#version 300 es
 		precision mediump float;
-		uniform sampler2D uTextureAtlas;
-		in vec4 vBaseColor;
-		in vec2 vTextureCoordinates;
-		out vec4 fColor;
 		void main() {
-			// calculate fragment color
-			fColor = texture(uTextureAtlas, vTextureCoordinates) * vBaseColor;
+			// TODO: fragment shader
 		}
 	</script>
 </head>
