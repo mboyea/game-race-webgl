@@ -1,5 +1,67 @@
 'use strict';
+const TARGET_FPS = 60;
+const TEXTURE_ATLAS_FILE_PATH = 'assets/racing-texture-atlas.png';
+
 const main = () => {
+	/* APPLICATION LOOP */ {
+		/** get the number of ms to wait for this frame to achieve targetFPS */
+		const msUntilFrameEnd = (targetFPS, deltaTimeMS) => {
+			const TIME_FRAME_SHOULD_LAST = 1000 / targetFPS;
+			return Math.max(0, TIME_FRAME_SHOULD_LAST - deltaTimeMS);
+		};
+		let frame = {
+			beginTimeMS: Date.now(),
+			updateEndTimeMS: Date.now(),
+			endTimeMS: Date.now(),
+			deltaTimeMS: 0,
+			deltaTimeS: 0,
+		};
+		const update = () => {
+			// TODO: update game
+		};
+		const render = () => {
+			// TODO: render game
+			// trigger loop
+			setTimeout(loop, msUntilFrameEnd(TARGET_FPS, Date.now() - frame.beginTimeMS));
+		};
+		const loop = () => {
+			frame.endTimeMS = Date.now();
+			frame.deltaTimeMS = frame.endTimeMS - frame.beginTimeMS;
+			frame.deltaTimeS = frame.deltaTimeMS / 1000;
+			frame.beginTimeMS = Date.now();
+			update();
+			requestAnimationFrame(render);
+		};
+		// start loop
+		render();
+	}
+};
+
+// if the document has loaded, call main(); otherwise, call main when the document loads
+if (['complete', 'interactive', 'loaded'].includes(document.readyState)) {
+	main();
+} else document.addEventListener('DOMContentLoaded', main);
+
+// ***************** REFERENCE ***************** //
+
+const loadTri = (vertices, a, b, c) => {
+};
+
+const loadQuad = (vertices, a, b, c, d) => {
+};
+
+const loadObj = (filePath) => {
+};
+
+const loadTexture = (filePath) => {
+
+}
+
+const setActiveTexture = (texture) => {
+
+}
+
+const oldMain = () => {
 	const pyramidEdgeLength = 1.5;
 	const targetFPS = 60;
 
@@ -199,8 +261,3 @@ const main = () => {
 		loop();
 	}
 };
-
-// if the document has loaded, call main(); otherwise, call main when the document loads
-if (['complete', 'interactive', 'loaded'].includes(document.readyState)) {
-	main();
-} else document.addEventListener('DOMContentLoaded', main);

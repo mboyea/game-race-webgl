@@ -6,7 +6,6 @@
 	<script type="text/javascript" src="../Common/initShaders.js"></script>
 	<script type="text/javascript" src="../Common/MVnew.js"></script>
 	<script type="text/javascript" src="MBProj8.js"></script>
-	<img src="racing-texture-atlas.png" id="texture-atlas" hidden></img>
 	<script type="x-shader/x-vertex" id="vertex-shader">
 		#version 300 es
 		uniform vec3 uRotationDegrees;
@@ -60,15 +59,14 @@
 	</script>
 </head>
 <body>
+	<h1>WebGL Racing Game</h1>
 	<canvas id="display" width="512" height="512">
 		<p>Sorry! Your web browser doesn't support the HTML5 Canvas element. Try a different browser.</p>
 	</canvas>
-	<div id="controls">
-		<button id="button-rotate-x">Rotate X</button>
-		<button id="button-rotate-y">Rotate Y</button>
-		<button id="button-rotate-z">Rotate Z</button>
-		<button id="button-pause">Pause/Play</button>
-	</div>
+	<h2>Controls</h2>
+	<p>Click and drag with mouse to rotate view.</p>
+	<p>[&larr;] to steer left [&rarr;] to steer right</p>
+	<p>[&uarr;] to go fast [&darr;] to go slow</p>
 </body>
 <style type="text/css">
 	canvas {
