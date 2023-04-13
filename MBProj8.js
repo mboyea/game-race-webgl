@@ -1,8 +1,15 @@
 'use strict';
-const TARGET_FPS = 60;
 const TEXTURE_ATLAS_FILE_PATH = 'assets/racing-texture-atlas.png';
 
 const main = () => {
+	let maxFPS = 20;
+
+	/* Initialize Input */ {
+		document.getElementById('fps-slider').addEventListener('input', (e) => {
+			maxFPS = e.target.value;
+		});
+	}
+
 	/* APPLICATION LOOP */ {
 		/** get the number of ms to wait for this frame to achieve targetFPS */
 		const msUntilFrameEnd = (targetFPS, deltaTimeMS) => {
@@ -18,11 +25,12 @@ const main = () => {
 		};
 		const update = () => {
 			// TODO: update game
+			console.log(frame.deltaTimeS);
 		};
 		const render = () => {
 			// TODO: render game
 			// trigger loop
-			setTimeout(loop, msUntilFrameEnd(TARGET_FPS, Date.now() - frame.beginTimeMS));
+			setTimeout(loop, msUntilFrameEnd(maxFPS, Date.now() - frame.beginTimeMS));
 		};
 		const loop = () => {
 			frame.endTimeMS = Date.now();

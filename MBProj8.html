@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-	<title>Rotating Pyramid</title>
+	<title>WebGL Racing Game</title>
 	<script type="text/javascript" src="../Common/initShaders.js"></script>
 	<script type="text/javascript" src="../Common/MVnew.js"></script>
 	<script type="text/javascript" src="MBProj8.js"></script>
@@ -65,12 +65,17 @@
 	</canvas>
 	<h2>Controls</h2>
 	<p>Click and drag with mouse to rotate view.</p>
-	<p>[&larr;] to steer left [&rarr;] to steer right</p>
-	<p>[&uarr;] to go fast [&darr;] to go slow</p>
+	<p>[&larr;] to steer left [&rarr;] to steer right [&uarr;] to go fast [&darr;] to go slow</p>
+	<h2>Settings</h2>
+	<table>
+		<tr>
+			<th>Max FPS</th>
+			<td>
+				10
+				<input type="range" value="20" min="10" max="60" step="2" id="fps-slider">
+				60
+			</td>
+		</tr>
+	</table>
 </body>
-<style type="text/css">
-	canvas {
-		background: blue;
-	}
-</style>
 </html>
