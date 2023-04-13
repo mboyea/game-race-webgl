@@ -1,10 +1,24 @@
 'use strict';
 const TEXTURE_ATLAS_FILE_PATH = 'assets/racing-texture-atlas.png';
+const CAR_FILE_PATH = 'assets/car.obj';
+const WHEEL_FILE_PATH = 'assets/wheel.obj';
 
 const main = () => {
 	let maxFPS = 20;
 
 	/* INITIALIZE INPUT */ {
+		document.addEventListener('keydown', (e) => {
+			switch(e.code) {
+				case('ArrowUp'):
+					break;
+				case('ArrowDown'):
+					break;
+				case('ArrowLeft'):
+					break;
+				case('ArrowRight'):
+					break;
+			}
+		});
 		document.getElementById('fps-slider').addEventListener('input', (e) => {
 			maxFPS = e.target.value;
 		});
