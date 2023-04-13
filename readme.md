@@ -9,9 +9,9 @@ This was my final project for CSCI 431.
 * Install git and ensure it's referencable by PATH.
 * Install Python 3 and ensure it's referencable by PATH.
 * Create a root folder to contain this project on your computer.
-* Create a folder called `Common` in the root folder and copy the contents of https://www.interactivecomputergraphics.com/8E/Code/Common/ into it.
+* Create a folder titled `Common` in the root folder and copy the contents of https://www.interactivecomputergraphics.com/8E/Code/Common/ into it.
 * Open a terminal in the root folder.
-* Type `git clone https://github.com/YourZombieMop/race-webgl`.
+* Type `git clone https://github.com/YourZombieMop/race-webgl` to clone this repository into a subfolder in the root folder titled `race-webgl`
 
 ### Run the project:
 * Open a terminal in the root folder.
