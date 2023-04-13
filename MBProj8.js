@@ -4,7 +4,55 @@ const CAR_FILE_PATH = 'assets/car.obj';
 const WHEEL_FILE_PATH = 'assets/wheel.obj';
 
 const main = () => {
+	/** @type {HTMLCanvasElement} */ let canvas;
+	/** @type {WebGL2RenderingContext} */ let gl;
+	/** @type {WebGLProgram} */ let shaderProgram;
+
+	/** @type {WebGLTexture} */ let textureAtlas;
+
 	let maxFPS = 20;
+
+	/* INITIALIZE WEBGL */ {
+		canvas = document.getElementById('display');
+		gl = canvas.getContext('webgl2');
+		if (!gl) {
+			console.error('Unable to initialize WebGL2.');
+			return;
+		}
+		// configure webgl
+		gl.viewport(0, 0, canvas.width, canvas.height);
+		gl.clearColor(1.0, 1.0, 1.0, 1.0);
+		gl.enable(gl.DEPTH_TEST);
+		// load shaders
+		shaderProgram = initShaders(gl, 'vertex-shader', 'fragment-shader');
+		gl.useProgram(shaderProgram);
+		// TODO4: get shader variables
+	}
+
+	/* LOAD TEXTURE ATLAS */ {
+		/**
+		 * load a WebGL texture & return it
+		 * @param {string} filePath 
+		 */
+		const loadTexture = (filePath) => {
+			// TODO1: load texture from file
+		}
+		/**
+		 * set the textureAtlas to this texture
+		 * @param {WebGLTexture} texture 
+		 */
+		const setActiveTexture = (texture) => {
+			// TODO2: set active texture
+		}
+	}
+
+	/* LOAD MAP */ {
+		// TODO: generate map mesh from json file
+	}
+
+	/* LOAD CARS */ {
+		// TODO3: generate car mesh from obj file
+	}
 
 	/* INITIALIZE INPUT */ {
 		document.addEventListener('keydown', (e) => {
@@ -25,7 +73,12 @@ const main = () => {
 	}
 
 	/* START APPLICATION LOOP */ {
-		/** get the number of ms to wait for this frame to achieve targetFPS */
+		/**
+		 * get the number of ms to wait for this frame to achieve targetFPS
+		 * @param {number} targetFPS 
+		 * @param {number} deltaTimeMS 
+		 * @returns 
+		 */
 		const msUntilFrameEnd = (targetFPS, deltaTimeMS) => {
 			const TIME_FRAME_SHOULD_LAST = 1000 / targetFPS;
 			return Math.max(0, TIME_FRAME_SHOULD_LAST - deltaTimeMS);
@@ -39,7 +92,7 @@ const main = () => {
 		};
 		const update = () => {
 			// TODO: update game
-			console.log(frame.deltaTimeS);
+			// console.log(frame.deltaTimeS);
 		};
 		const render = () => {
 			// TODO: render game
@@ -74,14 +127,6 @@ const loadQuad = (vertices, a, b, c, d) => {
 
 const loadObj = (filePath) => {
 };
-
-const loadTexture = (filePath) => {
-
-}
-
-const setActiveTexture = (texture) => {
-
-}
 
 const oldMain = () => {
 	const pyramidEdgeLength = 1.5;
@@ -130,7 +175,7 @@ const oldMain = () => {
 		// configure webgl
 		gl.viewport(0, 0, canvas.width, canvas.height);
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-    gl.enable(gl.DEPTH_TEST);
+		gl.enable(gl.DEPTH_TEST);
 		// load shaders
 		shaderProgram = initShaders(gl, 'vertex-shader', 'fragment-shader');
 		gl.useProgram(shaderProgram);
@@ -144,13 +189,13 @@ const oldMain = () => {
 
 	/* Load Texture Atlas */ {
 		const image = document.getElementById('texture-atlas');
-    textureAtlas = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, textureAtlas);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.uniform1i(uTextureAtlas, 0);
+		textureAtlas = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, textureAtlas);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+		gl.generateMipmap(gl.TEXTURE_2D);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.uniform1i(uTextureAtlas, 0);
 	}
 
 	/* Create Equilateral Pyramid Mesh */ {
@@ -232,8 +277,8 @@ const oldMain = () => {
 		textureCoordinateBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordinateBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices.textureCoordinates), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aTextureCoordinates, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(aTextureCoordinates);
+		gl.vertexAttribPointer(aTextureCoordinates, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(aTextureCoordinates);
 	}
 
 	/* Initialize Input */ {
