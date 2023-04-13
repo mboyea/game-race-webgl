@@ -51,7 +51,12 @@ const main = () => {
 	}
 
 	/* LOAD CARS */ {
+		// TODO3: figure out how to store multiple objects data (map & cars)
 		// TODO3: generate car mesh from obj file
+		// TODO5: instance 4 cars at different places
+		const loadTri = (vertices, a, b, c) => {};
+		const loadQuad = (vertices, a, b, c, d) => {};
+		const loadObj = (filePath) => {};
 	}
 
 	/* INITIALIZE INPUT */ {
@@ -118,15 +123,6 @@ if (['complete', 'interactive', 'loaded'].includes(document.readyState)) {
 } else document.addEventListener('DOMContentLoaded', main);
 
 // ***************** REFERENCE ***************** //
-
-const loadTri = (vertices, a, b, c) => {
-};
-
-const loadQuad = (vertices, a, b, c, d) => {
-};
-
-const loadObj = (filePath) => {
-};
 
 const oldMain = () => {
 	const pyramidEdgeLength = 1.5;
