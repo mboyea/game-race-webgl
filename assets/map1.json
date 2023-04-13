@@ -1,0 +1,44 @@
+{
+	"turns": [
+		{
+			"x": 0,
+			"y": 0,
+			"type": 2,
+			"isCounterClockwise": false
+		},
+		{
+			"x": 10,
+			"y": 20,
+			"type": 0,
+			"isCounterClockwise": false
+		},
+		{
+			"x": -10,
+			"y": 10,
+			"type": 1,
+			"isCounterClockwise": false
+		},
+		{
+			"x": 0,
+			"y": -10,
+			"type": 1,
+			"isCounterClockwise": false
+		},
+		{
+			"x": 20,
+			"y": -10,
+			"type": 2,
+			"isCounterClockwise": false
+		},
+		{
+			"x": 10,
+			"y": 0,
+			"type": 0,
+			"isCounterClockwise": false
+		}
+	],
+	"firstTurnIndex": 1,
+	"doReverseDirection": false,
+	"width": 4,
+	"typeSubdivisions": [18, 12, 6]
+}
