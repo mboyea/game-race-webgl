@@ -4,13 +4,13 @@ const TEXTURE_ATLAS_FILE_PATH = 'assets/racing-texture-atlas.png';
 const main = () => {
 	let maxFPS = 20;
 
-	/* Initialize Input */ {
+	/* INITIALIZE INPUT */ {
 		document.getElementById('fps-slider').addEventListener('input', (e) => {
 			maxFPS = e.target.value;
 		});
 	}
 
-	/* APPLICATION LOOP */ {
+	/* START APPLICATION LOOP */ {
 		/** get the number of ms to wait for this frame to achieve targetFPS */
 		const msUntilFrameEnd = (targetFPS, deltaTimeMS) => {
 			const TIME_FRAME_SHOULD_LAST = 1000 / targetFPS;
