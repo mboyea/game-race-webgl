@@ -2,15 +2,55 @@
 const TEXTURE_ATLAS_FILE_PATH = 'assets/racing-texture-atlas.png';
 const CAR_FILE_PATH = 'assets/car.obj';
 const WHEEL_FILE_PATH = 'assets/wheel.obj';
+const MAP_1_FILE_PATH = 'assets/map1.json';
 
-const main = () => {
+const main = async () => {
+	let maxFPS = 20;
+
 	/** @type {HTMLCanvasElement} */ let canvas;
 	/** @type {WebGL2RenderingContext} */ let gl;
 	/** @type {WebGLProgram} */ let shaderProgram;
-
+	/** @type {WebGLUniformLocation} */ let uProjectionMatrix;
+	/** @type {WebGLUniformLocation} */ let uModelViewMatrix;
+	/** @type {WebGLUniformLocation} */ let uLightPosition;
+	/** @type {WebGLUniformLocation} */ let uAmbientProduct;
+	/** @type {WebGLUniformLocation} */ let uDiffuseProduct;
+	/** @type {WebGLUniformLocation} */ let uSpecularProduct;
+	/** @type {WebGLUniformLocation} */ let uShininess;
+	/** @type {WebGLUniformLocation} */ let uNormalMatrix;
 	/** @type {WebGLUniformLocation} */ let uTextureAtlas;
+	/** @type {GLuint} */ let aPosition;
+	/** @type {GLuint} */ let aNormal;
+	/** @type {GLuint} */ let aTextureCoordinates;
 
-	let maxFPS = 20;
+	let carPrefab = {
+		vertexCount: 0,
+		wheels: [
+			{ x: 0.5, y: 1.48, z: 0.3 },
+			{ x: -1, y: 1.48, z: 0.3 },
+			{ x: 0.5, y: -1.5, z: 0.3 },
+			{ x: -1, y: -1.5, z: 0.3 },
+		],
+	};
+	let wheelPrefab = {
+		vertexCount: 0,
+	};
+	let cars = [
+		{
+			baseColor: vec4(1.0, 0.0, 0.0, 1.0),
+			x: 0,
+			y: 0,
+			rotation: 0,
+			wheelRotation: 0,
+		},
+		{
+			baseColor: vec4(0.0, 0.0, 1.0, 1.0),
+			x: 10,
+			y: 10,
+			rotation: 0,
+			wheelRotation: 0,
+		},
+	];
 
 	/* INITIALIZE WEBGL */ {
 		canvas = document.getElementById('display');
@@ -27,7 +67,18 @@ const main = () => {
 		shaderProgram = initShaders(gl, 'vertex-shader', 'fragment-shader');
 		gl.useProgram(shaderProgram);
 		// get shader variables
+		uProjectionMatrix = gl.getUniformLocation(shaderProgram, 'uProjectionMatrix');
+		uModelViewMatrix = gl.getUniformLocation(shaderProgram, 'uModelViewMatrix');
+		uLightPosition = gl.getUniformLocation(shaderProgram, 'uLightPosition');
+		uAmbientProduct = gl.getUniformLocation(shaderProgram, 'uAmbientProduct');
+		uDiffuseProduct = gl.getUniformLocation(shaderProgram, 'uDiffuseProduct');
+		uSpecularProduct = gl.getUniformLocation(shaderProgram, 'uSpecularProduct');
+		uShininess = gl.getUniformLocation(shaderProgram, 'uShininess');
+		uNormalMatrix = gl.getUniformLocation(shaderProgram, 'uNormalMatrix');
 		uTextureAtlas = gl.getUniformLocation(shaderProgram, 'uTextureAtlas');
+		aPosition = gl.getAttribLocation(shaderProgram, 'aPosition');
+		aNormal = gl.getAttribLocation(shaderProgram, 'aNormal');
+		aTextureCoordinates = gl.getAttribLocation(shaderProgram, 'aTextureCoordinates');
 	}
 
 	/* LOAD TEXTURE ATLAS */ {
@@ -61,17 +112,33 @@ const main = () => {
 		gl.uniform1i(uTextureAtlas, 0);
 	}
 
-	/* LOAD MAP */ {
-		// TODO6: generate map mesh from json file
-	}
-
-	/* LOAD CARS */ {
-		// TODO3: figure out how to store multiple objects data (map & cars)
-		// TODO3: generate car mesh from obj file
-		// TODO5: instance 4 cars at different places
+	/* LOAD VERTICES */ {
+		let vertices = {
+			positions: [],
+			normals: [],
+			textureCoordinates: [],
+		};
 		const loadTri = (vertices, a, b, c) => {};
-		const loadQuad = (vertices, a, b, c, d) => {};
-		const loadObj = (filePath) => {};
+		/* LOAD MODELS */ {
+			const carFetchResponse = fetch(CAR_FILE_PATH)
+			.catch(error => console.error(`Couldn't download car object file: ${error.message}`));
+			const wheelFetchResponse = fetch(WHEEL_FILE_PATH)
+			.catch(error => console.error(`Couldn't download car object file: ${error.message}`));
+			await Promise.all([carFetchResponse, wheelFetchResponse])
+			.then(async ([carResponse, wheelResponse]) => {
+				const carText = carResponse.text();
+				const wheelText = wheelResponse.text();
+				await Promise.all([carText, wheelText])
+				.then(([carText, wheelText]) => {
+					// TODO4: generate car mesh from obj file
+					console.log(carText);
+					console.log(wheelText);
+				});
+			});
+		}
+		/* LOAD MAP */ {
+			// TODO6: generate map mesh from json file
+		}
 	}
 
 	/* INITIALIZE INPUT */ {
@@ -87,6 +154,7 @@ const main = () => {
 					break;
 			}
 		});
+		// TODO5: add click and drag on canvas to rotate perspective
 		document.getElementById('fps-slider').addEventListener('input', (e) => {
 			maxFPS = e.target.value;
 		});
@@ -116,6 +184,7 @@ const main = () => {
 		const render = () => {
 			// TODO: render game
 			// !
+			// TODO5: instance 2 cars at different places
 			// trigger loop
 			setTimeout(loop, msUntilFrameEnd(maxFPS, Date.now() - frame.beginTimeMS));
 		};
