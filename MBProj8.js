@@ -119,6 +119,7 @@ const main = async () => {
 			textureCoordinates: [],
 		};
 		const loadTri = (vertices, a, b, c) => {};
+		const loadWavefront = (text) => {};
 		/* LOAD MODELS */ {
 			const carFetchResponse = fetch(CAR_FILE_PATH)
 			.catch(error => console.error(`Couldn't download car object file: ${error.message}`));
@@ -130,7 +131,8 @@ const main = async () => {
 				const wheelText = wheelResponse.text();
 				await Promise.all([carText, wheelText])
 				.then(([carText, wheelText]) => {
-					// TODO4: generate car mesh from obj file
+					// TODO4: generate car mesh
+					// TODO4: generate wheel mesh
 					console.log(carText);
 					console.log(wheelText);
 				});
