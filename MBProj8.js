@@ -118,25 +118,63 @@ const main = async () => {
 			normals: [],
 			textureCoordinates: [],
 		};
-		const loadTri = (vertices, a, b, c) => {};
-		const loadWavefront = (text) => {};
+		const loadWavefront = (text, meshObject) => {
+			let vertexPositions = [], vertexTextureCoordinates = [], vertexNormals = [];
+			const textArray = (text).split('\n')
+			for (let i = 0; i < textArray.length; i++) {
+				const textTokens = textArray[i].trim().split(' ');
+				switch(textTokens[0]) {
+					default:
+						break;
+					case 'o':
+						break;
+					case 'v':
+						vertexPositions.push([
+							Number(textTokens[1]),
+							Number(textTokens[2]),
+							Number(textTokens[3]),
+						]);
+						break;
+					case 'vt':
+						vertexTextureCoordinates.push([
+							Number(textTokens[1]),
+							Number(textTokens[2]),
+						]);
+						break;
+					case 'vn':
+						vertexNormals.push([
+							Number(textTokens[1]),
+							Number(textTokens[2]),
+							Number(textTokens[3]),
+						]);
+						break;
+					case 's':
+						break;
+					case 'f':
+						for (let j = 0; j < textTokens.length; j++) {
+							const numbers = textTokens[j].split('/').map(n => Number(n));
+							vertices.positions.push(vertexPositions[numbers[0]]);
+							vertices.textureCoordinates.push(vertexTextureCoordinates[numbers[1]]);
+							vertices.normals.push(vertexNormals[numbers[2]]);
+							meshObject.vertexCount++;
+						}
+						break;
+				}
+			}
+		};
 		/* LOAD MODELS */ {
 			const carFetchResponse = fetch(CAR_FILE_PATH)
 			.catch(error => console.error(`Couldn't download car object file: ${error.message}`));
 			const wheelFetchResponse = fetch(WHEEL_FILE_PATH)
 			.catch(error => console.error(`Couldn't download car object file: ${error.message}`));
-			await Promise.all([carFetchResponse, wheelFetchResponse])
-			.then(async ([carResponse, wheelResponse]) => {
-				const carText = carResponse.text();
-				const wheelText = wheelResponse.text();
-				await Promise.all([carText, wheelText])
-				.then(([carText, wheelText]) => {
-					// TODO4: generate car mesh
-					// TODO4: generate wheel mesh
-					console.log(carText);
-					console.log(wheelText);
-				});
-			});
+			const carTextResponse = (await carFetchResponse).text()
+			.catch(error => console.error(`Couldn't get car file text: ${error.message}`));
+			const wheelTextResponse = (await wheelFetchResponse).text()
+			.catch(error => console.error(`Couldn't get wheel file text: ${error.message}`));
+			// generate car mesh
+			loadWavefront(await carTextResponse, carPrefab);
+			// generate wheel mesh
+			loadWavefront(await wheelTextResponse, wheelPrefab);
 		}
 		/* LOAD MAP */ {
 			// TODO6: generate map mesh from json file
