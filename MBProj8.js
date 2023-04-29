@@ -10,6 +10,9 @@ const main = async () => {
 	/** @type {HTMLCanvasElement} */ let canvas;
 	/** @type {WebGL2RenderingContext} */ let gl;
 	/** @type {WebGLProgram} */ let shaderProgram;
+	/** @type {WebGLBuffer} */ let positionBuffer;
+	/** @type {WebGLBuffer} */ let normalBuffer;
+	/** @type {WebGLBuffer} */ let textureCoordinateBuffer;
 	/** @type {WebGLUniformLocation} */ let uProjectionMatrix;
 	/** @type {WebGLUniformLocation} */ let uModelViewMatrix;
 	/** @type {WebGLUniformLocation} */ let uLightPosition;
@@ -152,6 +155,7 @@ const main = async () => {
 						break;
 					case 'f':
 						for (let j = 0; j < textTokens.length; j++) {
+							// expects only triangular faces with normals and texture coordinates included
 							const numbers = textTokens[j].split('/').map(n => Number(n));
 							vertices.positions.push(vertexPositions[numbers[0]]);
 							vertices.textureCoordinates.push(vertexTextureCoordinates[numbers[1]]);
@@ -179,6 +183,27 @@ const main = async () => {
 		/* LOAD MAP */ {
 			// TODO6: generate map mesh from json file
 		}
+		// create gpu buffers, bind them, fill them with vertex data
+		const simpleFlatten = (arr) => {
+			let result = new Float32Array(arr.length);
+			for (let i = 0; i < arr.length; i++) result[i] = arr[i];
+			return result;
+		};
+		positionBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, simpleFlatten(vertices.positions), gl.STATIC_DRAW);
+		gl.vertexAttribPointer(aPosition, 4, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(aPosition);
+		normalBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, simpleFlatten(vertices.normals), gl.STATIC_DRAW);
+		gl.vertexAttribPointer(aNormal, 4, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(aNormal);
+		textureCoordinateBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordinateBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, simpleFlatten(vertices.textureCoordinates), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(aTextureCoordinates, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aTextureCoordinates);
 	}
 
 	/* INITIALIZE INPUT */ {
