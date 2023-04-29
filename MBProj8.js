@@ -8,9 +8,7 @@ const main = () => {
 	/** @type {WebGL2RenderingContext} */ let gl;
 	/** @type {WebGLProgram} */ let shaderProgram;
 
-	/** @type {WebGLTexture} */ let textureAtlas;
-
-	
+	/** @type {WebGLUniformLocation} */ let uTextureAtlas;
 
 	let maxFPS = 20;
 
@@ -28,24 +26,39 @@ const main = () => {
 		// load shaders
 		shaderProgram = initShaders(gl, 'vertex-shader', 'fragment-shader');
 		gl.useProgram(shaderProgram);
-		// TODO4: get shader variables
+		// get shader variables
+		uTextureAtlas = gl.getUniformLocation(shaderProgram, 'uTextureAtlas');
 	}
 
 	/* LOAD TEXTURE ATLAS */ {
-		/**
-		 * load a WebGL texture & return it
-		 * @param {string} filePath 
-		 */
-		const loadTexture = (filePath) => {
-			// TODO1: load texture from file
-		}
-		/**
-		 * set the textureAtlas to this texture
-		 * @param {WebGLTexture} texture 
-		 */
-		const setActiveTexture = (texture) => {
-			// TODO2: set active texture
-		}
+		// create texture atlas
+		const textureAtlas = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, textureAtlas);
+		// fill with default texture
+		gl.texImage2D(
+			gl.TEXTURE_2D, 0, gl.RGBA,
+			2, 2, 0,
+			gl.RGBA, gl.UNSIGNED_BYTE,
+			new Uint8Array([
+				255, 0, 255, 255,
+				0, 0, 0, 255,
+				255, 0, 255, 255,
+				0, 0, 0, 255,
+			])
+		);
+		// load image
+		const image = new Image();
+		image.onload = () => {
+			// replace default texture
+			gl.bindTexture(gl.TEXTURE_2D, textureAtlas);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+			gl.generateMipmap(gl.TEXTURE_2D);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		};
+		image.src = TEXTURE_ATLAS_FILE_PATH;
+		// update texture atlas shader variable
+		gl.uniform1i(uTextureAtlas, 0);
 	}
 
 	/* LOAD MAP */ {
