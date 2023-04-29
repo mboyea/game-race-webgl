@@ -8,15 +8,61 @@
 	<script type="text/javascript" src="MBProj8.js"></script>
 	<script type="x-shader/x-vertex" id="vertex-shader">
 		#version 300 es
+		uniform mat4 uProjectionMatrix;
+		uniform vec4 uLightPosition;
+		uniform mat4 uModelViewMatrix;
+		uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
+		uniform float uShininess;
+		uniform mat3 uNormalMatrix;
+		in vec4 aPosition;
+		in vec4 aNormal;
+		in vec2 aTextureCoordinates;
+		out vec4 vBaseColor;
+		out vec2 vTextureCoordinates;
 		void main() {
-			// TODO4: vertex shader
+			// The Blinn-Phong Gouraud Lighting Model
+			// calculate vertex base position (before projection)
+			vec3 basePosition = (uModelViewMatrix * aPosition).xyz;
+			// calculate vertex normal (in eye coordinates)
+			vec3 vertexNormal = normalize(uNormalMatrix * aNormal.xyz);
+			// calculate light properties
+			vec3 lightDirection;
+			if (uLightPosition.w == 0.0) {
+				// direction light
+				lightDirection = normalize(uLightPosition.xyz);
+			} else {
+				// point light
+				lightDirection = normalize(uLightPosition.xyz - basePosition);
+			}
+			vec3 exponent = -normalize(basePosition);
+			vec3 halfwayVector = normalize(lightDirection + exponent);
+			// calculate illumination properties
+			vec4 ambient = uAmbientProduct;
+			vec4 diffuse = max(dot(lightDirection, vertexNormal), 0.0) * uDiffuseProduct;
+			vec4 specular = pow(max(dot(vertexNormal, halfwayVector), 0.0), uShininess) * uSpecularProduct;
+			if (dot(lightDirection, vertexNormal) < 0.0) {
+				specular = vec4(0.0, 0.0, 0.0, 1.0);
+			}
+			// calculate vertex position
+			gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+			// calculate vertex base color
+			vBaseColor = ambient + diffuse + specular;
+			vBaseColor.a = 1.0;
+			// calculate vertex texture coordinates
+			vTextureCoordinates = aTextureCoordinates;
 		}
 	</script>
 	<script type="x-shader/x-fragment" id="fragment-shader">
 		#version 300 es
 		precision mediump float;
+		uniform sampler2D uTextureAtlas;
+		in vec4 vBaseColor;
+		in vec2 vTextureCoordinates;
+		out vec4 fColor;
 		void main() {
-			// TODO4: fragment shader
+			// Flat Shading
+			/* calculate fragment color */
+			fColor = texture(uTextureAtlas, vTextureCoordinates) * vBaseColor;
 		}
 	</script>
 </head>
@@ -26,7 +72,7 @@
 		<p>Sorry! Your web browser doesn't support the HTML5 Canvas element. Try a different browser.</p>
 	</canvas>
 	<h2>Controls</h2>
-	<p>Click and drag with the mouse to rotate view.</p>
+	<p>Click and drag with the mouse to rotate the view.</p>
 	<p>[&larr;] to steer left</p>
 	<p>[&rarr;] to steer right</p>
 	<p>[&uarr;] to go fast</p>
