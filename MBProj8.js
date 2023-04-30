@@ -4,6 +4,10 @@ const CAR_FILE_PATH = 'assets/car.obj';
 const WHEEL_FILE_PATH = 'assets/wheel.obj';
 const MAP_1_FILE_PATH = 'assets/map1.json';
 
+const toRadians = (degrees) => {
+	return degrees * (Math.PI / 180);
+}
+
 const main = async () => {
 	/** @type {HTMLCanvasElement} */ let canvas;
 	/** @type {WebGL2RenderingContext} */ let gl;
@@ -27,12 +31,16 @@ const main = async () => {
 	let viewMatrix, viewNormalMatrix, modelViewMatrix;
 	let fpsTarget = 24;
 	let camera = {
-		position: vec3(5, -10, 10),
-		lookTarget: vec3(0, 0, 0),
-		upDirection: vec3(0, 0, 1),
 		width: 20,
 		height: 20,
+		rotationX: Math.PI * -0.5,
+		rotationY: Math.PI * 0.3,
 		clipDistance: 20,
+		targetDistance: 10,
+		targetPosition: vec3(0, 0, 0),
+		lookTarget: vec3(0, 0, 0),
+		upDirection: vec3(0, 0, 1),
+		doRotateWithMouse: false,
 	};
 	let light = {
 		position: vec4(6, 0, 10, 0),
@@ -63,16 +71,22 @@ const main = async () => {
 		{
 			baseColor: vec4(1, 0, 0.15, 1),
 			position: vec3(0, 0, 0),
-			rotation: 10,
-			wheelRotation: 8,
+			rotation: -10,
+			wheelAngle: 0,
+			wheelRotation: 10,
 		},
 		{
 			baseColor: vec4(0, 0.3, 1, 1),
 			position: vec3(4, 0, 0),
 			rotation: -30,
-			wheelRotation: -12,
+			wheelAngle: -12,
+			wheelRotation: 0,
 		},
 	];
+	let input = {
+		horizontal: 0,
+		vertical: 0,
+	}
 
 	/* INITIALIZE WEBGL */ {
 		canvas = document.getElementById('display');
@@ -85,6 +99,7 @@ const main = async () => {
 		gl.viewport(0, 0, canvas.width, canvas.height);
 		gl.clearColor(1, 1, 1, 1);
 		gl.enable(gl.DEPTH_TEST);
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 		// load shaders
 		shaderProgram = initShaders(gl, 'vertex-shader', 'fragment-shader');
 		gl.useProgram(shaderProgram);
@@ -176,7 +191,7 @@ const main = async () => {
 						break;
 					case 'f':
 						for (let j = 1; j < textTokens.length; j++) {
-							// ! expects only tri faces that include positions, texture coordinates, and normals
+							// ! expects only tri faces that include valid positions, texture coordinates, and normals
 							const indices = textTokens[j].split('/').map(n => Number(n));
 							vertexPositions[indices[0]-1].forEach(n => vertices.positions.push(n));
 							vertexTextureCoordinates[indices[1]-1].forEach(n => vertices.textureCoordinates.push(n));
@@ -228,7 +243,7 @@ const main = async () => {
 	}
 
 	/* INITIALIZE CAMERA & MATERIAL & LIGHT PROPERTIES */ {
-		// calculate camera view matrices
+		// calculate camera projection matrix
 		const projectionMatrix = ortho(
 			-(camera.width / 2),
 			camera.width / 2,
@@ -238,10 +253,6 @@ const main = async () => {
 			camera.clipDistance
 		);
     gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
-		viewMatrix = lookAt(camera.position, camera.lookTarget, camera.upDirection);
-		gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(viewMatrix));
-		viewNormalMatrix = normalMatrix(viewMatrix, true);
-		gl.uniformMatrix3fv(uNormalMatrix, false, flatten(viewNormalMatrix));
 		// define material shininess
     gl.uniform1f(uShininess, material.shininess);
 		// define light position
@@ -256,21 +267,83 @@ const main = async () => {
 	}
 
 	/* INITIALIZE INPUT */ {
+		const fpsSlider = document.getElementById('fps-slider');
+		fpsSlider.value = fpsTarget;
+		fpsSlider.addEventListener('input', (e) => {
+			fpsTarget = e.target.value;
+		});
+		canvas.addEventListener('wheel', (e) => {
+			e.preventDefault();
+			const ZOOM_SPEED = 0.05;
+			camera.clipDistance = Math.max(8, camera.clipDistance + e.deltaY * ZOOM_SPEED);
+			camera.width = camera.clipDistance;
+			camera.height = camera.clipDistance;
+			camera.targetDistance = camera.clipDistance / 2;
+			const projectionMatrix = ortho(
+				-(camera.width / 2),
+				camera.width / 2,
+				-(camera.height / 2),
+				camera.height / 2,
+				0,
+				camera.clipDistance
+			);
+			gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
+		});
+		canvas.addEventListener('mousedown', (e) => {
+			e.preventDefault();
+			camera.doRotateWithMouse = true;
+		});
+		document.addEventListener('mouseup', (e) => {
+			camera.doRotateWithMouse = false;
+		});
+		document.addEventListener('mousemove', (e) => {
+			const CAMERA_ROTATION_SPEED = 0.01;
+			if (camera.doRotateWithMouse) {
+				camera.rotationX = (camera.rotationX - e.movementX * CAMERA_ROTATION_SPEED) % (2 * Math.PI);
+				camera.rotationY = Math.max(
+					0.01,
+					Math.min(
+						Math.PI,
+						(camera.rotationY - e.movementY * CAMERA_ROTATION_SPEED) % (2 * Math.PI)
+					),
+				);
+			}
+		});
 		document.addEventListener('keydown', (e) => {
-			switch(e.code) {
-				case('ArrowUp'):
-					break;
-				case('ArrowDown'):
-					break;
+			switch(e.key) {
 				case('ArrowLeft'):
+					e.preventDefault();
+					input.horizontal = Math.max(-1, input.horizontal - 1);
 					break;
 				case('ArrowRight'):
+					e.preventDefault();
+					input.horizontal = Math.min(1, input.horizontal + 1);
+					break;
+				case('ArrowUp'):
+					e.preventDefault();
+					input.vertical = Math.min(1, input.vertical + 1);
+					break;
+				case('ArrowDown'):
+					e.preventDefault();
+					input.vertical = Math.max(-1, input.vertical - 1);
 					break;
 			}
 		});
-		// TODO5: add click and drag on canvas to rotate perspective
-		document.getElementById('fps-slider').addEventListener('input', (e) => {
-			fpsTarget = e.target.value;
+		document.addEventListener('keyup', (e) => {
+			switch(e.key) {
+				case('ArrowLeft'):
+					input.horizontal = Math.min(1, input.horizontal + 1);
+					break;
+				case('ArrowRight'):
+					input.horizontal = Math.max(-1, input.horizontal - 1);
+					break;
+				case('ArrowUp'):
+					input.vertical = Math.max(-1, input.vertical - 1);
+					break;
+				case('ArrowDown'):
+					input.vertical = Math.min(1, input.vertical + 1);
+					break;
+			}
 		});
 	}
 
@@ -292,14 +365,35 @@ const main = async () => {
 			fps: fpsTarget,
 		};
 		const update = () => {
-			// TODO8: update game
-			// !
+			const PLAYER_MOVE_SPEED = 12;
+			const PLAYER_ROTATION_SPEED = 50;
+			cars[0].wheelAngle = input.horizontal * 10;
+			if (input.vertical != 0) {
+				cars[0].position = vec3(
+					cars[0].position[0] + input.vertical * Math.sin(toRadians(cars[0].rotation)) * PLAYER_MOVE_SPEED * frame.deltaTimeS,
+					cars[0].position[1] + input.vertical * Math.cos(toRadians(cars[0].rotation)) * PLAYER_MOVE_SPEED * frame.deltaTimeS,
+					cars[0].position[2],
+				);
+				cars[0].rotation += input.horizontal * input.vertical * PLAYER_ROTATION_SPEED * frame.deltaTimeS;
+				cars[0].wheelRotation += input.vertical * PLAYER_MOVE_SPEED * 50 * frame.deltaTimeS;
+			}
+			camera.targetPosition = cars[0].position;
+			camera.lookTarget = camera.targetPosition;
 		};
 		const render = () => {
 			// clear screen
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			// calculate camera view matrix
-			viewMatrix = lookAt(camera.position, camera.lookTarget, camera.upDirection);
+			let cameraPosition = vec3(
+				camera.targetPosition[0] + camera.targetDistance * Math.sin(camera.rotationY) * Math.cos(camera.rotationX),
+				camera.targetPosition[1] + camera.targetDistance * Math.sin(camera.rotationY) * Math.sin(camera.rotationX),
+				camera.targetPosition[2] + camera.targetDistance * Math.cos(camera.rotationY),
+			);
+			viewMatrix = lookAt(
+				cameraPosition,
+				camera.lookTarget,
+				camera.upDirection,
+			);
 			// render each car
 			cars.forEach((car) => {
 				// calculate car material
@@ -321,7 +415,8 @@ const main = async () => {
 				carPrefab.wheels.forEach((wheel) => {
 					// calculate wheel model view matrix
 					let wheelModelMatrix = mult(modelMatrix, translate(wheel.x, wheel.y, wheel.z));
-					if (wheel.doRotate) wheelModelMatrix = mult(wheelModelMatrix, rotate(car.wheelRotation, vec3(0, 0, 1)));
+					if (wheel.doRotate) wheelModelMatrix = mult(wheelModelMatrix, rotate(car.wheelAngle, vec3(0, 0, 1)));
+					wheelModelMatrix = mult(wheelModelMatrix, rotate(car.wheelRotation, vec3(1, 0, 0)));
 					modelViewMatrix = mult(viewMatrix, wheelModelMatrix);
 					gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
 					viewNormalMatrix = normalMatrix(modelViewMatrix, true);
