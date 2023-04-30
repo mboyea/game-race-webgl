@@ -26,7 +26,7 @@ const main = async () => {
 	/** @type {GLuint} */ let aNormal;
 	/** @type {GLuint} */ let aTextureCoordinates;
 
-	let modelViewMatrix, normalMatrix;
+	let modelViewMatrix, viewNormalMatrix;
 	let camera = {
 		position: vec3(0, 0, 10),
 		lookTarget: vec3(0, 0, 0),
@@ -223,9 +223,13 @@ const main = async () => {
 	}
 
 	/* INITIALIZE CAMERA & MATERIAL & LIGHT PROPERTIES */ {
-		// create projection matrix
+		// calculate camera view matrices
 		const projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
     gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
+		modelViewMatrix = lookAt(camera.position, camera.lookTarget, camera.upDirection);
+    gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+		viewNormalMatrix = normalMatrix(modelViewMatrix, true);
+		gl.uniformMatrix3fv(uNormalMatrix, false, flatten(viewNormalMatrix));
 		// define material shininess
     gl.uniform1f(uShininess, material.shininess);
 		// define light position
