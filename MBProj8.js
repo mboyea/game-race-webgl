@@ -42,34 +42,35 @@ const main = async () => {
 	};
 	let material = {
 		ambient: vec4(1, 1, 1, 1),
-		diffuse: vec4(1, 0, 0, 1),
+		diffuse: vec4(1, 1, 1, 1),
 		specular: vec4(1, 1, 1, 1),
 		shininess: 40,
 	};
 	let carPrefab = {
 		vertexCount: 0,
 		wheels: [
-			{ x: 0.5, y: 1.48, z: 0.3 },
-			{ x: -1, y: 1.48, z: 0.3 },
-			{ x: 0.5, y: -1.5, z: 0.3 },
-			{ x: -1, y: -1.5, z: 0.3 },
+			{ x: 0.6, y: 1.48, z: 0.3, doRotate: true },
+			{ x: -1.1, y: 1.48, z: 0.3, doRotate: true },
+			{ x: 0.6, y: -1.5, z: 0.3, doRotate: false },
+			{ x: -1.1, y: -1.5, z: 0.3, doRotate: false },
 		],
 	};
 	let wheelPrefab = {
 		vertexCount: 0,
+		baseColor: vec4(0.1, 0.1, 0.1, 1),
 	};
 	let cars = [
 		{
-			baseColor: vec4(1, 0, 0, 1),
+			baseColor: vec4(1, 0, 0.15, 1),
 			position: vec3(0, 0, 0),
-			rotation: 0,
-			wheelRotation: 0,
+			rotation: 10,
+			wheelRotation: 8,
 		},
 		{
-			baseColor: vec4(0, 0, 1, 1),
+			baseColor: vec4(0, 0.3, 1, 1),
 			position: vec3(4, 0, 0),
-			rotation: 0,
-			wheelRotation: 0,
+			rotation: -30,
+			wheelRotation: -12,
 		},
 	];
 
@@ -302,6 +303,8 @@ const main = async () => {
 			// render each car
 			cars.forEach((car) => {
 				// calculate car material
+				let diffuseProduct = mult(light.diffuse, mult(material.diffuse, car.baseColor));
+				gl.uniform4fv(uDiffuseProduct, diffuseProduct);
 				// calculate car model matrix
 				let modelMatrix = translate(car.position[0], car.position[1], car.position[2]);
 				modelMatrix = mult(modelMatrix, rotate(car.rotation, vec3(0, 0, 1)));
@@ -312,6 +315,20 @@ const main = async () => {
 				gl.uniformMatrix3fv(uNormalMatrix, false, flatten(viewNormalMatrix));
 				// render car
 				gl.drawArrays(gl.TRIANGLES, 0, carPrefab.vertexCount);
+				// calculate wheel material
+				diffuseProduct = mult(light.diffuse, mult(material.diffuse, wheelPrefab.baseColor));
+				gl.uniform4fv(uDiffuseProduct, diffuseProduct);
+				carPrefab.wheels.forEach((wheel) => {
+					// calculate wheel model view matrix
+					let wheelModelMatrix = mult(modelMatrix, translate(wheel.x, wheel.y, wheel.z));
+					if (wheel.doRotate) wheelModelMatrix = mult(wheelModelMatrix, rotate(car.wheelRotation, vec3(0, 0, 1)));
+					modelViewMatrix = mult(viewMatrix, wheelModelMatrix);
+					gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+					viewNormalMatrix = normalMatrix(modelViewMatrix, true);
+					gl.uniformMatrix3fv(uNormalMatrix, false, flatten(viewNormalMatrix));
+					// render wheel
+					gl.drawArrays(gl.TRIANGLES, carPrefab.vertexCount, wheelPrefab.vertexCount);
+				});
 			});
 			// TODO7: render map
 			// trigger loop
