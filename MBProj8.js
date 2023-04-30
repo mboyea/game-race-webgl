@@ -226,6 +226,10 @@ const main = async () => {
 		// create projection matrix
 		const projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
     gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
+		// define material shininess
+    gl.uniform1f(uShininess, material.shininess);
+		// define light position
+		gl.uniform4fv(uLightPosition, light.position);
 		// calculate ambient, diffuse, specular products between light & material
 		const ambientProduct = mult(light.ambient, material.ambient);
 		const diffuseProduct = mult(light.diffuse, material.diffuse);
@@ -233,10 +237,6 @@ const main = async () => {
     gl.uniform4fv(uAmbientProduct, ambientProduct);
     gl.uniform4fv(uDiffuseProduct, diffuseProduct);
     gl.uniform4fv(uSpecularProduct, specularProduct);
-		// define material shininess
-    gl.uniform1f(uShininess, material.shininess);
-		// define light position
-		gl.uniform4fv(uLightPosition, light.position);
 	}
 
 	/* INITIALIZE INPUT */ {
