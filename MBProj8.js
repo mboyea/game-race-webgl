@@ -5,8 +5,6 @@ const WHEEL_FILE_PATH = 'assets/wheel.obj';
 const MAP_1_FILE_PATH = 'assets/map1.json';
 
 const main = async () => {
-	let fpsTarget = 24;
-
 	/** @type {HTMLCanvasElement} */ let canvas;
 	/** @type {WebGL2RenderingContext} */ let gl;
 	/** @type {WebGLProgram} */ let shaderProgram;
@@ -27,10 +25,14 @@ const main = async () => {
 	/** @type {GLuint} */ let aTextureCoordinates;
 
 	let viewMatrix, viewNormalMatrix, modelViewMatrix;
+	let fpsTarget = 24;
 	let camera = {
-		position: vec3(0, 0, 5),
+		position: vec3(5, -10, 10),
 		lookTarget: vec3(0, 0, 0),
-		upDirection: vec3(0, 1, 0),
+		upDirection: vec3(0, 0, 1),
+		width: 20,
+		height: 20,
+		clipDistance: 20,
 	};
 	let light = {
 		position: vec4(6, 0, 10, 0),
@@ -42,7 +44,7 @@ const main = async () => {
 		ambient: vec4(1, 1, 1, 1),
 		diffuse: vec4(1, 0, 0, 1),
 		specular: vec4(1, 1, 1, 1),
-		shininess: 20,
+		shininess: 40,
 	};
 	let carPrefab = {
 		vertexCount: 0,
@@ -65,7 +67,7 @@ const main = async () => {
 		},
 		{
 			baseColor: vec4(0, 0, 1, 1),
-			position: vec3(10, 0, 0),
+			position: vec3(4, 0, 0),
 			rotation: 0,
 			wheelRotation: 0,
 		},
@@ -152,6 +154,7 @@ const main = async () => {
 							Number(textTokens[1]),
 							Number(textTokens[2]),
 							Number(textTokens[3]),
+							1,
 						]);
 						break;
 					case 'vt':
@@ -165,17 +168,18 @@ const main = async () => {
 							Number(textTokens[1]),
 							Number(textTokens[2]),
 							Number(textTokens[3]),
+							1,
 						]);
 						break;
 					case 's':
 						break;
 					case 'f':
 						for (let j = 1; j < textTokens.length; j++) {
-							// ! expects only triangular faces with normals and texture coordinates
-							const numbers = textTokens[j].split('/').map(n => Number(n));
-							vertexPositions[numbers[0]-1].forEach(n => vertices.positions.push(n));
-							vertexTextureCoordinates[numbers[1]-1].forEach(n => vertices.textureCoordinates.push(n));
-							vertexNormals[numbers[2]-1].forEach(n => vertices.normals.push(n));
+							// ! expects only tri faces that include positions, texture coordinates, and normals
+							const indices = textTokens[j].split('/').map(n => Number(n));
+							vertexPositions[indices[0]-1].forEach(n => vertices.positions.push(n));
+							vertexTextureCoordinates[indices[1]-1].forEach(n => vertices.textureCoordinates.push(n));
+							vertexNormals[indices[2]-1].forEach(n => vertices.normals.push(n));
 							meshObject.vertexCount++;
 						}
 						break;
@@ -224,7 +228,14 @@ const main = async () => {
 
 	/* INITIALIZE CAMERA & MATERIAL & LIGHT PROPERTIES */ {
 		// calculate camera view matrices
-		const projectionMatrix = ortho(-20, 20, -20, 20, -20, 20);
+		const projectionMatrix = ortho(
+			-(camera.width / 2),
+			camera.width / 2,
+			-(camera.height / 2),
+			camera.height / 2,
+			0,
+			camera.clipDistance
+		);
     gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
 		viewMatrix = lookAt(camera.position, camera.lookTarget, camera.upDirection);
 		gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(viewMatrix));
@@ -288,15 +299,12 @@ const main = async () => {
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			// calculate camera view matrix
 			viewMatrix = lookAt(camera.position, camera.lookTarget, camera.upDirection);
-			gl.drawArrays(gl.TRIANGLES, 0, carPrefab.vertexCount);
-			/*
 			// render each car
 			cars.forEach((car) => {
+				// calculate car material
 				// calculate car model matrix
-				const modelMatrix = mult(
-					translate(car.position.x, car.position.y, car.position.z),
-					rotate(car.rotation, vec3(0, 0, 1)),
-				);
+				let modelMatrix = translate(car.position[0], car.position[1], car.position[2]);
+				modelMatrix = mult(modelMatrix, rotate(car.rotation, vec3(0, 0, 1)));
 				// calculate car model view matrix
 				modelViewMatrix = mult(viewMatrix, modelMatrix);
 				gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
@@ -305,7 +313,6 @@ const main = async () => {
 				// render car
 				gl.drawArrays(gl.TRIANGLES, 0, carPrefab.vertexCount);
 			});
-			*/
 			// TODO7: render map
 			// trigger loop
 			setTimeout(loop, msUntilFrameEnd(fpsTarget, Date.now() - frame.beginTimeMS));
