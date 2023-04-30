@@ -5,7 +5,7 @@ const WHEEL_FILE_PATH = 'assets/wheel.obj';
 const MAP_1_FILE_PATH = 'assets/map1.json';
 
 const main = async () => {
-	let maxFPS = 20;
+	let fpsTarget = 24;
 
 	/** @type {HTMLCanvasElement} */ let canvas;
 	/** @type {WebGL2RenderingContext} */ let gl;
@@ -26,6 +26,24 @@ const main = async () => {
 	/** @type {GLuint} */ let aNormal;
 	/** @type {GLuint} */ let aTextureCoordinates;
 
+	let modelViewMatrix, normalMatrix;
+	let camera = {
+		position: vec3(0, 0, 10),
+		lookTarget: vec3(0, 0, 0),
+		upDirection: vec3(0, 1, 0),
+	};
+	let light = {
+		position: vec4(6, 0, 10, 0),
+		ambient: vec4(0.2, 0.2, 0.2, 1),
+		diffuse: vec4(1, 1, 1, 1),
+		specular: vec4(1, 1, 1, 1),
+	};
+	let material = {
+		ambient: vec4(1, 1, 1, 1),
+		diffuse: vec4(1, 1, 1, 1),
+		specular: vec4(1, 1, 1, 1),
+		shininess: 20,
+	};
 	let carPrefab = {
 		vertexCount: 0,
 		wheels: [
@@ -40,16 +58,14 @@ const main = async () => {
 	};
 	let cars = [
 		{
-			baseColor: vec4(1.0, 0.0, 0.0, 1.0),
-			x: 0,
-			y: 0,
+			baseColor: vec4(1, 0, 0, 1),
+			position: vec3(0, 0, 0),
 			rotation: 0,
 			wheelRotation: 0,
 		},
 		{
-			baseColor: vec4(0.0, 0.0, 1.0, 1.0),
-			x: 10,
-			y: 10,
+			baseColor: vec4(0, 0, 1, 1),
+			position: vec3(10, 0, 0),
 			rotation: 0,
 			wheelRotation: 0,
 		},
@@ -183,7 +199,7 @@ const main = async () => {
 		/* LOAD MAP */ {
 			// TODO6: generate map mesh from json file
 		}
-		// create gpu buffers, bind them, fill them with vertex data
+		// create gpu buffers, fill them with vertex data
 		const simpleFlatten = (arr) => {
 			let result = new Float32Array(arr.length);
 			for (let i = 0; i < arr.length; i++) result[i] = arr[i];
@@ -206,6 +222,23 @@ const main = async () => {
     gl.enableVertexAttribArray(aTextureCoordinates);
 	}
 
+	/* INITIALIZE CAMERA & MATERIAL & LIGHT PROPERTIES */ {
+		// create projection matrix
+		const projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
+    gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
+		// calculate ambient, diffuse, specular products between light & material
+		const ambientProduct = mult(light.ambient, material.ambient);
+		const diffuseProduct = mult(light.diffuse, material.diffuse);
+		const specularProduct = mult(light.specular, material.specular);
+    gl.uniform4fv(uAmbientProduct, ambientProduct);
+    gl.uniform4fv(uDiffuseProduct, diffuseProduct);
+    gl.uniform4fv(uSpecularProduct, specularProduct);
+		// define material shininess
+    gl.uniform1f(uShininess, material.shininess);
+		// define light position
+		gl.uniform4fv(uLightPosition, light.position);
+	}
+
 	/* INITIALIZE INPUT */ {
 		document.addEventListener('keydown', (e) => {
 			switch(e.code) {
@@ -221,7 +254,7 @@ const main = async () => {
 		});
 		// TODO5: add click and drag on canvas to rotate perspective
 		document.getElementById('fps-slider').addEventListener('input', (e) => {
-			maxFPS = e.target.value;
+			fpsTarget = e.target.value;
 		});
 	}
 
@@ -241,6 +274,7 @@ const main = async () => {
 			endTimeMS: Date.now(),
 			deltaTimeMS: 0,
 			deltaTimeS: 0,
+			fps: fpsTarget,
 		};
 		const update = () => {
 			// TODO: update game
@@ -248,15 +282,17 @@ const main = async () => {
 		};
 		const render = () => {
 			// TODO: render game
-			// !
-			// TODO5: instance 2 cars at different places
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			cars.forEach((car) => {
+			});
 			// trigger loop
-			setTimeout(loop, msUntilFrameEnd(maxFPS, Date.now() - frame.beginTimeMS));
+			setTimeout(loop, msUntilFrameEnd(fpsTarget, Date.now() - frame.beginTimeMS));
 		};
 		const loop = () => {
 			frame.endTimeMS = Date.now();
 			frame.deltaTimeMS = frame.endTimeMS - frame.beginTimeMS;
 			frame.deltaTimeS = frame.deltaTimeMS / 1000;
+			frame.fps = 1000 / frame.deltaTimeMS;
 			frame.beginTimeMS = Date.now();
 			update();
 			requestAnimationFrame(render);
