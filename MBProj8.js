@@ -15,12 +15,12 @@ const main = async () => {
 	/** @type {WebGLBuffer} */ let textureCoordinateBuffer;
 	/** @type {WebGLUniformLocation} */ let uProjectionMatrix;
 	/** @type {WebGLUniformLocation} */ let uModelViewMatrix;
+	/** @type {WebGLUniformLocation} */ let uNormalMatrix;
 	/** @type {WebGLUniformLocation} */ let uLightPosition;
 	/** @type {WebGLUniformLocation} */ let uAmbientProduct;
 	/** @type {WebGLUniformLocation} */ let uDiffuseProduct;
 	/** @type {WebGLUniformLocation} */ let uSpecularProduct;
 	/** @type {WebGLUniformLocation} */ let uShininess;
-	/** @type {WebGLUniformLocation} */ let uNormalMatrix;
 	/** @type {WebGLUniformLocation} */ let uTextureAtlas;
 	/** @type {GLuint} */ let aPosition;
 	/** @type {GLuint} */ let aNormal;
