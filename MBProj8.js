@@ -238,8 +238,8 @@ const main = async () => {
 		textureCoordinateBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordinateBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, simpleFlatten(vertices.textureCoordinates), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aTextureCoordinates, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(aTextureCoordinates);
+		gl.vertexAttribPointer(aTextureCoordinates, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(aTextureCoordinates);
 	}
 
 	/* INITIALIZE CAMERA & MATERIAL & LIGHT PROPERTIES */ {
@@ -252,18 +252,18 @@ const main = async () => {
 			0,
 			camera.clipDistance
 		);
-    gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
+		gl.uniformMatrix4fv(uProjectionMatrix, false, flatten(projectionMatrix));
 		// define material shininess
-    gl.uniform1f(uShininess, material.shininess);
+		gl.uniform1f(uShininess, material.shininess);
 		// define light position
 		gl.uniform4fv(uLightPosition, light.position);
 		// calculate ambient, diffuse, specular products between light & material
 		const ambientProduct = mult(light.ambient, material.ambient);
 		const diffuseProduct = mult(light.diffuse, material.diffuse);
 		const specularProduct = mult(light.specular, material.specular);
-    gl.uniform4fv(uAmbientProduct, ambientProduct);
-    gl.uniform4fv(uDiffuseProduct, diffuseProduct);
-    gl.uniform4fv(uSpecularProduct, specularProduct);
+		gl.uniform4fv(uAmbientProduct, ambientProduct);
+		gl.uniform4fv(uDiffuseProduct, diffuseProduct);
+		gl.uniform4fv(uSpecularProduct, specularProduct);
 	}
 
 	/* INITIALIZE INPUT */ {
