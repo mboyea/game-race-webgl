@@ -1,20 +1,19 @@
 WebGL Race Game
 ===
-S2023 FHSU CSCI 431 Computer Graphics Project 8
+Hardware-acellerated 3D racing game for the web browser
 ---
-This is a very simple 3D racing game made with HTML/CSS/JavaScript, WebGL, and GLSL.
-This was my final project for CSCI 431.
+This is a very simple racing game made with HTML/CSS/JavaScript, WebGL, and GLSL.
 
-### Prepare the project:
-* Install git and ensure it's referencable by PATH.
-* Install Python 3 and ensure it's referencable by PATH.
-* Create a root folder to contain this project on your computer.
-* Create a folder titled `Common` in the root folder and copy the contents of https://www.interactivecomputergraphics.com/8E/Code/Common/ into it.
-* Open a terminal in the root folder.
-* Type `git clone https://github.com/YourZombieMop/race-webgl` to clone this repository into a subfolder in the root folder titled `race-webgl`
+![Screenshot of game screen.](img/game-screen.png)
 
-### Run the project:
+### Installation Guide
+* [Install git](https://github.com/git-guides/install-git).
+* [Clone this repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository) to a directory on your computer. That directory will be referred to as `root`.
+
+### Run Guide
+Run any server in the `root` directory to serve `index.html`. The easiest way I know of to do this is with Python:
+* [Install Python 3](https://realpython.com/installing-python/) and ensure it's referencable by PATH.
 * Open a terminal in the root folder.
 * Run `python -m http.server 8000` in the terminal.
-* Navigate to http://localhost:8000 in a web browser.
-* Navigate to the html file (MBProj8.html) using the links in the browser.
+* Navigate to [localhost:8000](http://localhost:8000) in a web browser.
+
