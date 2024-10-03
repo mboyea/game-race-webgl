@@ -1,6 +1,6 @@
 WebGL Race Game
 ===
-Hardware-acellerated 3D racing game for the web browser
+Hardware-accelerated 3D racing game for the web browser
 ---
 This is a very simple racing game made with HTML/CSS/JavaScript, WebGL, and GLSL.
 
